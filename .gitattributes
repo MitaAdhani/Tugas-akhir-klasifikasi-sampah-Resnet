@@ -1,0 +1,2 @@
+klasifikasi_sampah_menggunakan_ResNet-50. filter=lfs diff=lfs merge=lfs -text
+klasifikasi_sampah_menggunakan_ResNet-50.h5 filter=lfs diff=lfs merge=lfs -text
