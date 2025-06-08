@@ -47,7 +47,7 @@ available_layers = [l for l in layer_names if any(layer.name == l for layer in r
 selected_layer = st.sidebar.selectbox("🔍 Pilih Layer ResNet50", available_layers)
 
 # --- Upload gambar ---
-uploaded_file = st.file_uploader("📤 Upload Gambar Sampah", type=["jpg", "jpeg", "png"])
+uploaded_file = st.file_uploader("📤 Upload Gambar Sampah", type=["jpg", "jpeg"])
 
 if uploaded_file:
     try:
