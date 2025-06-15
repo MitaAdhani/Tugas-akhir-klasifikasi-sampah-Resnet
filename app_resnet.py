@@ -108,7 +108,7 @@ if uploaded_file:
             if i < len(axes):
                 axes[i].imshow(feat_map[:, :, i], cmap="viridis")
                 axes[i].axis("off")
-                axes[i].set_title(f"Ch {i}")
+                axes[i].set_title(f"Ch {i+1}")  # ✅ Label +1 agar match dengan slider
         for j in range(max_channels, len(axes)):
             axes[j].axis("off")
 
@@ -131,14 +131,14 @@ if uploaded_file:
 
         # --- 3D Scatter ---
         st.markdown("### 🌐 3D Scatter Feature Map")
-        ch_idx = st.slider("Channel untuk Scatter", 0, ch - 1, 0)
+        ch_idx = st.slider("Channel untuk Scatter", 0, ch - 1, 0, format="Channel %d")
         fmap_3d = feat_map[:, :, ch_idx]
         if fmap_3d.ndim == 2:
             xx, yy = np.meshgrid(range(fmap_3d.shape[1]), range(fmap_3d.shape[0]))
             fig_3d = plt.figure(figsize=(10, 6))
             ax = fig_3d.add_subplot(111, projection='3d')
             sc = ax.scatter(xx.flatten(), yy.flatten(), fmap_3d.flatten(), c=fmap_3d.flatten(), cmap="plasma", s=10)
-            ax.set_title(f"3D Feature Map - {selected_layer}, Channel {ch_idx}")
+            ax.set_title(f"3D Feature Map - {selected_layer}, Channel {ch_idx+1}")
             ax.set_xlabel("X"); ax.set_ylabel("Y"); ax.set_zlabel("Aktivasi")
             fig_3d.colorbar(sc, shrink=0.5, aspect=10)
             st.pyplot(fig_3d)
