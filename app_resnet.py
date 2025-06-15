@@ -2,7 +2,6 @@ import streamlit as st
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from PIL import Image, UnidentifiedImageError
 import json
 
@@ -57,12 +56,15 @@ if uploaded_file:
         st.error("❌ Gagal membaca gambar.")
         st.stop()
 
+    # Tampilkan gambar dalam ukuran tetap
     image_display = image.resize((300, 300))
     st.image(image_display, caption="🖼️ Gambar Diupload (ukuran tetap)", width=300)
 
+    # Resize ke ukuran model
     resized_image = image.resize((224, 224))
     img_array = np.expand_dims(np.array(resized_image).astype(np.float32), axis=0)
 
+    # --- Prediksi ---
     prediction = model.predict(img_array)
     pred_class = class_names[np.argmax(prediction)]
     confidence = np.max(prediction)
@@ -95,18 +97,18 @@ if uploaded_file:
         ch = feat_map.shape[-1]
         st.markdown(f"### 🧱 Feature Map - {selected_layer} (shape: {feat_map.shape})")
 
-        max_channels = st.slider("🔢 Jumlah Channel yang Ditampilkan", 1, ch, value=min(64, ch))
-        grid_cols = st.slider("🧱 Kolom Grid", 2, min(16, max_channels), value=6)
+        max_channels = st.slider("🔢 Jumlah Channel yang Ditampilkan", 1, ch, min(32, ch))
+        grid_cols = st.slider("🧱 Kolom Grid", 2, min(16, max_channels), 6)
         grid_rows = (max_channels + grid_cols - 1) // grid_cols
 
-        fig, axes = plt.subplots(grid_rows, grid_cols, figsize=(grid_cols * 2.5, grid_rows * 2.5))
-        axes = axes.flatten()
+        fig, axes = plt.subplots(grid_rows, grid_cols, figsize=(12, grid_rows * 2))
+        axes = axes.flatten() if isinstance(axes, np.ndarray) else [axes]
 
         for i in range(max_channels):
-            fmap = feat_map[:, :, i]
-            axes[i].imshow(fmap, cmap="viridis")
-            axes[i].axis("off")
-            axes[i].set_title(f"Ch {i}")
+            if i < len(axes):
+                axes[i].imshow(feat_map[:, :, i], cmap="viridis")
+                axes[i].axis("off")
+                axes[i].set_title(f"Ch {i}")
         for j in range(max_channels, len(axes)):
             axes[j].axis("off")
 
