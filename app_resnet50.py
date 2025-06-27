@@ -13,7 +13,7 @@ st.title("🧠 Visualisasi ResNet50 - Klasifikasi Sampah")
 
 # --- Unduh model dari Google Drive jika belum ada ---
 def download_model_from_drive():
-    file_id = "1IvJ4MMfz9kai02MZDhHvUAW7UkhCYh9w"  # Ganti dengan ID Google Drive model kamu
+    file_id = "1IvJ4MMfz9kai02MZDhHvUAW7UkhCYh9w"  # ID model di Google Drive
     url = f"https://drive.google.com/uc?id={file_id}"
     output = "klasifikasi_sampah_menggunakan_ResNet-50.h5"
 
@@ -63,7 +63,7 @@ available_layers = [l for l in layer_names if any(layer.name == l for layer in r
 selected_layer = st.sidebar.selectbox("🔍 Pilih Layer ResNet50", available_layers)
 
 # --- Upload gambar ---
-uploaded_file = st.file_uploader("📤 Upload Gambar Sampah", type=["jpg", "jpeg"])
+uploaded_file = st.file_uploader("📤 Upload Gambar Sampah (.jpg, .jpeg)", type=["jpg", "jpeg"])
 
 if uploaded_file:
     try:
@@ -72,18 +72,22 @@ if uploaded_file:
         st.error("❌ Gagal membaca gambar.")
         st.stop()
 
-    # Tampilkan gambar dalam ukuran tetap
     image_display = image.resize((300, 300))
     st.image(image_display, caption="🖼️ Gambar Diupload (ukuran tetap)", width=300)
 
-    # Resize ke ukuran model
     resized_image = image.resize((224, 224))
     img_array = np.expand_dims(np.array(resized_image).astype(np.float32), axis=0)
 
     # --- Prediksi ---
     prediction = model.predict(img_array)
-    pred_class = class_names[np.argmax(prediction)]
     confidence = np.max(prediction)
+    pred_idx = np.argmax(prediction)
+
+    threshold = 0.6  # Confidence threshold
+    if confidence < threshold:
+        pred_class = "❌ Gambar tidak dikenali sebagai sampah, Coba gambar lain"
+    else:
+        pred_class = class_names[pred_idx]
 
     st.success(f"✅ Prediksi: **{pred_class}** ({confidence * 100:.2f}%)")
 
@@ -131,7 +135,6 @@ if uploaded_file:
         plt.tight_layout()
         st.pyplot(fig)
 
-        # --- Heatmap Overlay ---
         st.markdown("### 🔥 Heatmap Overlay")
         heatmap = np.mean(feat_map, axis=-1)
         heatmap = np.clip(heatmap / (np.max(heatmap) + 1e-6), 0, 1)
@@ -145,7 +148,6 @@ if uploaded_file:
         plt.axis("off")
         st.pyplot(fig_overlay)
 
-        # --- 3D Scatter ---
         st.markdown("### 🌐 3D Scatter Feature Map")
         ch_idx = st.slider("Channel untuk Scatter", 0, ch - 1, 0, format="Channel %d")
         fmap_3d = feat_map[:, :, ch_idx]
